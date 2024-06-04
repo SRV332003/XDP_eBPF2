@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	ifaceIndex, port, processId, err := handlers.HandleInput()
+	ifaceIndex, passport, failport, err := handlers.HandleInput()
 	if err != nil {
 		log.Fatalf("Failed to get input: %v", err)
 	}
@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("Failed to remove memlock limit: %v", err)
 	}
 
-	preCompiled := handlers.GetXDPProgram(port, processId)
+	preCompiled := handlers.GetXDPProgram(passport, failport)
 
 	// Load the eBPF program into the kernel.
 	prog, err := ebpf.NewProgram(preCompiled)
@@ -45,7 +45,7 @@ func main() {
 	}
 	defer l.Close()
 
-	fmt.Printf("Started dropping TCP packets on port %d\n", port)
+	fmt.Printf("Started dropping TCP packets on all ports of the process other than %d\n", passport)
 
 	// Keep the program running
 	var op string

@@ -7,13 +7,13 @@ import (
 	"github.com/SRV332003/XDP_eBPF/functions"
 )
 
-func HandleInput() (int, int, int, error) {
+func HandleInput() (int, int, []int, error) {
 	//take user input
 	var inputport int
 	fmt.Print("Enter the port number to block (press enter to pickup from .env): ")
 	fmt.Scanln(&inputport)
 	if inputport < 0 || inputport > 65535 {
-		return 0, 0, 0, errors.New("Invalid port number")
+		return 0, 0, nil, errors.New("Invalid port number")
 	}
 	if inputport == 0 {
 		inputport = functions.EnvPort()
@@ -30,7 +30,7 @@ func HandleInput() (int, int, int, error) {
 	// Get the interface index.
 	ifaceIndex, err := functions.GetIfaceIdex(ifaceName)
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, nil, err
 	}
 
 	//take user input
@@ -44,12 +44,18 @@ func HandleInput() (int, int, int, error) {
 	//Get the process ID
 	processID, err := functions.GetPIDByName(process)
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, nil, err
+	}
+
+	//Get the ports used by the process
+	ports, err := functions.GetPortByPID(processID)
+	if err != nil {
+		return 0, 0, nil, err
 	}
 
 	fmt.Println("------------------------------")
 	fmt.Println("Interface index:", ifaceIndex, "\nInterface name:", ifaceName, "\nProcess ID:", processID, process)
 
-	return ifaceIndex, inputport, processID, nil
+	return ifaceIndex, inputport, ports, nil
 
 }

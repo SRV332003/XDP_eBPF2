@@ -3,8 +3,10 @@ package functions
 import (
 	"bytes"
 	"errors"
+	"log"
 	"net"
 	"os/exec"
+	"regexp"
 	"strconv"
 )
 
@@ -43,4 +45,30 @@ func GetPIDByName(name string) (int, error) {
 	}
 
 	return pid, nil
+}
+
+func GetPortByPID(pid int) ([]int, error) {
+	cmd := exec.Command("lsof", "-Pan", "-p", strconv.Itoa(pid), "-i")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	re := regexp.MustCompile(`\s\d+.\d+.\d+.\d+:(\d+)(->|\s)`)
+
+	portstr := re.FindAllSubmatch(output, -1)
+
+	var ports []int
+
+	for _, port := range portstr {
+		iport, err := strconv.Atoi(string(port[1]))
+		if err != nil {
+			log.Println("Failed to get port from lsof output", err)
+			return nil, err
+		}
+		ports = append(ports, iport)
+	}
+	log.Println(ports)
+
+	return ports, nil
 }
