@@ -30,7 +30,7 @@ func HandleInput() (int, int, []int, error) {
 	// Get the interface index.
 	ifaceIndex, err := functions.GetIfaceIdex(ifaceName)
 	if err != nil {
-		return 0, 0, nil, err
+		return 0, 0, nil, fmt.Errorf("Failed to get interface index: %v", err)
 	}
 
 	//take user input
@@ -44,13 +44,13 @@ func HandleInput() (int, int, []int, error) {
 	//Get the process ID
 	processID, err := functions.GetPIDByName(process)
 	if err != nil {
-		return 0, 0, nil, err
+		return 0, 0, nil, fmt.Errorf("Failed to get process ID: %v", err)
 	}
 
 	//Get the ports used by the process
 	ports, err := functions.GetPortByPID(processID)
 	if err != nil {
-		return 0, 0, nil, err
+		return 0, 0, nil, fmt.Errorf("Failed to get ports for process id: %s\n%v", processID, err)
 	}
 
 	fmt.Println("------------------------------")

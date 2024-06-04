@@ -3,6 +3,7 @@ package functions
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os/exec"
@@ -31,27 +32,26 @@ func GetIfaceIdex(ifaceName string) (int, error) {
 	return ifaceIndex, nil
 }
 
-func GetPIDByName(name string) (int, error) {
+func GetPIDByName(name string) (string, error) {
 	cmd := exec.Command("pgrep", name)
 	output, err := cmd.Output()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	pidStr := string(bytes.TrimSpace(output))
-	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
-		return 0, err
-	}
 
-	return pid, nil
+	return pidStr, nil
 }
 
-func GetPortByPID(pid int) ([]int, error) {
-	cmd := exec.Command("lsof", "-Pan", "-p", strconv.Itoa(pid), "-i")
+func GetPortByPID(pid string) ([]int, error) {
+	cmd := exec.Command("lsof", "-Pan", "-p", pid, "-i")
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("command execution failed: %v, stderr: %s", err, stderr.String())
 	}
 
 	re := regexp.MustCompile(`\s\d+.\d+.\d+.\d+:(\d+)(->|\s)`)
@@ -63,8 +63,7 @@ func GetPortByPID(pid int) ([]int, error) {
 	for _, port := range portstr {
 		iport, err := strconv.Atoi(string(port[1]))
 		if err != nil {
-			log.Println("Failed to get port from lsof output", err)
-			return nil, err
+			return nil, fmt.Errorf("Failed to convert port to int: %v", err)
 		}
 		ports = append(ports, iport)
 	}
