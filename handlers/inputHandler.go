@@ -47,7 +47,8 @@ func HandleInput() (int, int, int, error) {
 		return 0, 0, 0, err
 	}
 
-	fmt.Println("Interface index:", ifaceIndex, "\nInterface name:", ifaceName, "\nProcess ID:", processID)
+	fmt.Println("------------------------------")
+	fmt.Println("Interface index:", ifaceIndex, "\nInterface name:", ifaceName, "\nProcess ID:", processID, process)
 
 	return ifaceIndex, inputport, processID, nil
 

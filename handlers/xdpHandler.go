@@ -42,11 +42,11 @@ func GetXDPProgram(port int, processId int) *ebpf.ProgramSpec {
 			asm.LoadMem(asm.R2, asm.R8, 3, asm.Half), // Load TCP dest port field into R2 (offset 40)
 			asm.JEq.Imm(asm.R2, int32(port), "exit"), // Jump to exit if not port 4040
 
-			asm.Mov.Imm(asm.R0, 1), // Set return code to XDP_DROP (1)
+			asm.Mov.Imm(asm.R0, 2), // Set return code to XDP_DROP (1)
 			asm.Return(),           // Return from program
 
 			// Exit label
-			asm.Mov.Imm(asm.R0, 2).WithSymbol("exit"), // Set return code to XDP_PASS (2)
+			asm.Mov.Imm(asm.R0, 1).WithSymbol("exit"), // Set return code to XDP_PASS (2)
 			asm.Return(), // Return from program
 		},
 	}

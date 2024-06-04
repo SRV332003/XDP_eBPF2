@@ -48,7 +48,9 @@ func main() {
 	fmt.Printf("Started dropping TCP packets on port %d\n", port)
 
 	// Keep the program running
-	select {}
+	var op string
+	fmt.Scan(&op)
+
 }
 
 func init() {
