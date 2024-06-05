@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func GetIfaceIdex(ifaceName string) (int, error) {
@@ -40,18 +41,20 @@ func GetPIDByName(name string) (string, error) {
 	}
 
 	pidStr := string(bytes.TrimSpace(output))
+	arr := strings.Split(pidStr, "\n")
+	pidStr = arr[0]
 
 	return pidStr, nil
 }
 
 func GetPortByPID(pid string) ([]int, error) {
-	cmd := exec.Command("lsof", "-Pan", "-p", pid, "-i")
+	cmd := exec.Command("lsof", "-Pan", "-p", pid, "-i", "-V")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("command execution failed: %v, stderr: %s", err, stderr.String())
+		return nil, fmt.Errorf("command execution failed: %v, stderr: %s, out: %s", err, stderr.String(), output)
 	}
 
 	re := regexp.MustCompile(`\s\d+.\d+.\d+.\d+:(\d+)(->|\s)`)
